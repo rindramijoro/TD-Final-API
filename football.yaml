@@ -1,0 +1,345 @@
+openapi: 3.0.3
+info:
+  title: Copetetion managment
+  description: An easy way to manage teams and competitions
+  version: 1.0.3
+
+servers:
+  - url: https://localhost.competitions-managment.com
+
+paths:
+  /competitions:
+    get:
+      summary: Get a list of competitions
+      description: give the list of all competitions that exists
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: The page number to retrieve.
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+          required: true
+          description: The number of items per page.
+      responses:
+        "200":
+          description: list of all competitions that exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListOfCompetitions"
+    post:
+      summary: Create a new competition
+      description: Add a new competition to the list of competition.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompetition"
+      responses:
+        "201":
+          description: The competition has been created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Competition"
+
+  /teams:
+    get:
+      summary: Get a list of teams
+      description: give the list of all teams
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: The page number to retrieve.
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+          required: true
+          description: The number of items per page.
+        - in: query
+          name: teamName
+          schema:
+            type: string
+          description: Filter teams by name.
+      responses:
+        "200":
+          description: List of teams
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListOfTeams"
+    post:
+      summary: Create a new team
+      description: Add a new team to the list of teams
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTeam"
+      responses:
+        "201":
+          description: The team has been created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+
+  /teams/{teamId}/competitions:
+    post:
+      summary: register a team to an existing competition
+      description: register a team to a competition so the team can compete in that competition.
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema:
+            type: string
+          description: The ID of the team.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterATeamToCompetitions"
+      responses:
+        "200":
+          description: The team has been registered to the competition.
+
+  /teams/{teamId}/players:
+    get:
+      summary: Get a list of players in a team
+      description: give a list of all the players that plays for a team
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema:
+            type: string
+          description: The ID of the team.
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: The page number to retrieve.
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+          required: true
+          description: The number of items per page.
+        - in: query
+          name: playerName
+          schema:
+            type: string
+          description: Filter players by name.
+      responses:
+        "200":
+          description: List of players.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListOfPlayers"
+    post:
+      summary: Sign a player
+      description: Allow teams to add a player to it's effectif
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema:
+            type: string
+          description: The ID of the team.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignPlayers"
+      responses:
+        "200":
+          description: The player to your tema? HERE WE GO!
+
+components:
+  schemas:
+    Competition:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the competition.
+        name:
+          type: string
+          description: The name of the competition.
+        location:
+          type: string
+          description: The country or continent where the competition takes place.
+
+    CreateCompetition:
+      type: object
+      required:
+        - name
+        - location
+      properties:
+        name:
+          type: string
+          description: The name of the competition.
+        location:
+          type: string
+          description: The country or continent where the competition takes place.
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the team.
+        name:
+          type: string
+          description: The name of the team.
+        slogan:
+          type: string
+          description: The slogan of the team.
+        competitions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Competition"
+          description: A list of competitions the team participates in.
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/Player"
+          description: A list of players in the team.
+
+    CreateTeam:
+      type: object
+      required:
+        - name
+        - slogan
+      properties:
+        name:
+          type: string
+          description: The name of the team.
+        slogan:
+          type: string
+          description: The slogan of the team.
+
+    Player:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the player.
+        name:
+          type: string
+          description: The name of the player.
+        number:
+          type: integer
+          description: The player's number.
+        strongFoot:
+          type: string
+          enum:
+            - Left
+            - Right
+          description: The player's strong foot, either Left or Right.
+
+    CreatePlayer:
+      type: object
+      required:
+        - name
+        - number
+        - strongFoot
+      properties:
+        name:
+          type: string
+          description: The name of the player.
+        number:
+          type: integer
+          description: The player's number.
+        strongFoot:
+          type: string
+          enum:
+            - Left
+            - Right
+          description: The player's strong foot, either Left or Right.
+
+    ListOfCompetitions:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Competition"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+
+    ListOfTeams:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Team"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+
+    ListOfPlayers:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Player"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+
+    RegisterATeamToCompetitions:
+      type: object
+      required:
+        - competitionIds
+      properties:
+        competitionIds:
+          type: array
+          items:
+            type: string
+          description: A list of competition IDs to associate with the team.
+
+    SignPlayers:
+      type: object
+      required:
+        - playerIds
+      properties:
+        playerIds:
+          type: array
+          items:
+            type: string
+          description: A list of player IDs to associate with the team.
